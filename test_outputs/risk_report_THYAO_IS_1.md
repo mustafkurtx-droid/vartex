@@ -30,8 +30,8 @@ The following table and chart compare the **Historical VaR** method using past d
 
 | Confidence Level | Historical VaR | Monte Carlo VaR | Difference (MC - Historical) |
 | :--- | :--- | :--- | :--- |
-| **95%** | 2.51% | 3.22% | 0.71% |
-| **99%** | 5.10% | 4.51% | -0.59% |
+| **95%** | 2.51% | 3.25% | 0.74% |
+| **99%** | 5.10% | 4.72% | -0.38% |
 
 ### Monte Carlo 1-Day Simulated Return Distribution (THYAO.IS)
 The distribution of returns obtained from the simulation and the Monte Carlo VaR values are shown in the chart below:
@@ -41,5 +41,3 @@ The distribution of returns obtained from the simulation and the Monte Carlo VaR
 ### Comparison Analysis Commentary
 1. **Model Assumption:** While Monte Carlo VaR runs under the assumption that returns are normally distributed, Historical VaR directly incorporates skewness and heavy-tailed (kurtosis) properties present in historical data.
 2. **Tail Deviations:** Real financial returns are typically fatter-tailed (extreme events happen more frequently) compared to a normal distribution. The differences between Historical VaR and Monte Carlo VaR in the comparison indicate the degree of these anomalies in the market.
-
-UNIQUE_MARKER_FOR_TEST

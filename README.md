@@ -1,23 +1,23 @@
-# Vartex - Çoklu Varlık Risk Analiz ve Portföy Yönetim Sistemi
+# Vartex - Multi-Asset Risk Analysis and Portfolio Management System
 
-**Vartex**, hisse senetlerinin risk metriklerini deterministik yöntemler ve olasılıksal simülasyonlar kullanarak analiz eden, PyPI güvenlik denetimlerine sahip, esnek portföy çeşitlendirmesi sunan modüler bir risk yönetim sistemidir.
-
----
-
-## 🚀 Temel Özellikler
-
-1. **Güvenlik & Bağımlılık Kontrolü:** Typosquatting ve halüsinasyon kütüphane risklerine karşı `requirements.txt` dosyasını PyPI JSON API'si üzerinden otomatik doğrular.
-2. **Deterministik Risk Metrikleri:** Logaritmik getiriler üzerinden Volatilite, Sharpe Oranı, Maksimum Tarihsel Kayıp (Max DD) ve Tarihsel VaR (%95/%99) hesaplar.
-3. **Kritik Risk Geçitleri (Human-in-the-Loop):** Belirlenen risk eşikleri aşıldığında onay mekanizmasını devreye alır.
-4. **Olasılıksal Projeksiyon:** Geometrik Brownian Motion (GBM) modeliyle 10,000 denemeli Monte Carlo simülasyonları gerçekleştirir.
-5. **Çoklu Varlık Portföy Modu (--portfolio):** N adet varlık arasındaki korelasyon matrisini hesaplar, eşit ağırlıklı portföy riski ile tekil riskleri karşılaştırıp **dolar bazında çeşitlendirme faydasını (risk kazancını)** sunar.
-6. **Zengin Terminal Arayüzü (Rich):** CLI ekranında renk kodlu özet paneller, korelasyon analizleri ve tablolar basar.
+**Vartex** is a modular risk management system that analyzes stock risk metrics using deterministic methods and probabilistic simulations, performs PyPI security audits, and provides flexible portfolio diversification analysis.
 
 ---
 
-## 🛠️ Kurulum ve Çalıştırma
+## 🚀 Key Features
 
-### 1. Sanal Ortamı Aktif Edin
+1. **Security & Dependency Check:** Automatically verifies `requirements.txt` against the PyPI JSON API to protect against typosquatting and hallucinated package risks.
+2. **Deterministic Risk Metrics:** Calculates Volatility, Sharpe Ratio, Maximum Historical Drawdown (Max DD), and Historical VaR (95%/99%) based on logarithmic returns.
+3. **Critical Risk Gates (Human-in-the-Loop):** Triggers an approval mechanism when predefined risk thresholds are exceeded.
+4. **Probabilistic Projection:** Performs Monte Carlo simulations with 10,000 trials using the Geometric Brownian Motion (GBM) model.
+5. **Multi-Asset Portfolio Mode (`--portfolio`):** Computes the correlation matrix among N assets, compares equally-weighted portfolio risk against individual risks, and calculates the **diversification benefit (risk savings) in USD**.
+6. **Rich Terminal UI (Rich):** Renders color-coded summary panels, correlation analyses, and tables in the terminal.
+
+---
+
+## 🛠️ Setup and Execution
+
+### 1. Activate the Virtual Environment
 * **Windows PowerShell:**
   ```powershell
   .\venv\Scripts\Activate.ps1
@@ -27,15 +27,15 @@
   venv\Scripts\activate.bat
   ```
 
-### 2. Tek Hisse Analiz Modu
+### 2. Single Stock Analysis Mode
 ```bash
 python main.py THYAO.IS
 ```
 
-### 3. Çoklu Varlık Portföy Risk Karşılaştırma Modu
+### 3. Multi-Asset Portfolio Risk Comparison Mode
 ```bash
 python main.py --portfolio THYAO.IS AAPL GARAN.IS MSFT GOOGL --amount 10000 --no-interactive
 ```
 
 ---
-*Bu sistem tamamen Python numpy, pandas, matplotlib ve rich kütüphaneleriyle yazılmış olup, yatırım tavsiyesi içermez.*
+*This system is written entirely using Python numpy, pandas, matplotlib, and rich libraries, and does not contain investment advice.*

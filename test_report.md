@@ -3,7 +3,7 @@
 This report contains the results of the pytest integration tests run on the actual codebase representing the Gherkin behavioral scenarios (`risk_agent.feature`).
 
 ## Test Summary
-- **Report Date:** 2026-06-20 00:52:41
+- **Report Date:** 2026-06-20 01:11:43
 - **Total Tested Scenarios:** 5
 - **Passed Tests:** 5
 - **Failed Tests:** 0
@@ -48,6 +48,6 @@ C:\Users\musta\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest
     session.config.cache.set(STEPWISE_CACHE_DIR, [])
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-================== 5 passed, 2 warnings in 107.35s (0:01:47) ==================
+================== 5 passed, 2 warnings in 111.32s (0:01:51) ==================
 
 ```

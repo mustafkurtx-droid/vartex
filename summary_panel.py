@@ -151,7 +151,7 @@ def show_single_panel(ticker, report_path):
         
     panel = Panel(
         Align.center(table),
-        title=f"[bold green] VARTEX - [{ticker}]\nRisk Analiz Özeti[/]",
+        title=f"[bold green] VARTEX - [{ticker}]\nRisk Analysis Summary[/]",
         subtitle=f"[bold blue]Report Location: {os.path.abspath(report_path)}[/]",
         border_style="green",
         expand=False
