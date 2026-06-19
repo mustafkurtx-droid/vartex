@@ -1,6 +1,8 @@
 # Vartex - Multi-Asset Risk Analysis and Portfolio Management System
 
-<video src="2026-06-20%2000-53-32%20-%20Trim.mp4" width="100%" controls></video>
+![Vartex Demonstration Video](https://github.com/mustafkurtx-droid/vartex/blob/main/2026-06-20%2000-53-32%20-%20Trim.mp4?raw=true)
+
+[Click here to watch the demo video directly on GitHub](https://github.com/mustafkurtx-droid/vartex/blob/main/2026-06-20%2000-53-32%20-%20Trim.mp4)
 
 **Vartex** is a modular risk management system that analyzes stock risk metrics using deterministic methods and probabilistic simulations, performs PyPI security audits, and provides flexible portfolio diversification analysis.
 
