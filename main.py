@@ -1,8 +1,14 @@
 import os
 import sys
+import shutil
 import subprocess
 
 def run_security_check():
+    # Test-only opt-in bypass (default off). The dedicated security test does
+    # NOT set this, so the real PyPI audit is still exercised there.
+    if os.environ.get("VARTEX_SKIP_SECURITY") == "1":
+        print(">>> Security check skipped (VARTEX_SKIP_SECURITY=1).")
+        return
     print(">>> Running security check on requirements.txt...")
     result = subprocess.run(
         [sys.executable, "check_pypi_packages.py"],
@@ -53,21 +59,31 @@ def prompt_user(message, no_interactive=False):
             print("\nProcess cancelled.")
             return False
 
-def run_single_stock(ticker, no_interactive, output_dir):
+def run_single_stock(ticker, no_interactive, output_dir, input_csv=None):
     print(f"\n==========================================")
     print(f"  Analyzing Ticker: {ticker}")
     print(f"==========================================")
-    
-    # 1. Fetch stock data
-    print(">>> Fetching stock data...")
-    result = subprocess.run(
-        [sys.executable, "data_fetcher.py", ticker],
-        capture_output=False,
-        text=True
-    )
-    if result.returncode != 0:
-        print(f"[-] Error: Data fetching failed for ticker '{ticker}'. Please verify the stock symbol.")
-        sys.exit(1)
+
+    # 1. Fetch stock data (or use a provided CSV in test mode, skipping yfinance)
+    if input_csv:
+        clean_ticker = ticker.replace(".", "_")
+        dest = os.path.join(output_dir, f"{clean_ticker}_data.csv")
+        print(f">>> Test mode: using provided CSV '{input_csv}' (skipping network fetch)...")
+        try:
+            shutil.copy2(input_csv, dest)
+        except Exception as e:
+            print(f"[-] Error: Could not load provided --input-csv '{input_csv}': {str(e)}")
+            sys.exit(1)
+    else:
+        print(">>> Fetching stock data...")
+        result = subprocess.run(
+            [sys.executable, "data_fetcher.py", ticker],
+            capture_output=False,
+            text=True
+        )
+        if result.returncode != 0:
+            print(f"[-] Error: Data fetching failed for ticker '{ticker}'. Please verify the stock symbol.")
+            sys.exit(1)
         
     # 2. Prompt for deterministic risk analysis
     if not prompt_user("[?] Stock data fetched successfully. Proceed to deterministic risk analysis?", no_interactive):
@@ -251,9 +267,31 @@ def main():
         sys.exit(1)
         
     no_interactive = "--no-interactive" in args
-    # Clean --no-interactive from arguments list to ease manual parsing
-    args_clean = [a for a in args if a != "--no-interactive"]
-    
+
+    # Optional test-mode CSV: bypasses yfinance by feeding a fixed dataset.
+    input_csv = None
+    if "--input-csv" in args:
+        idx = args.index("--input-csv")
+        if idx + 1 < len(args):
+            input_csv = args[idx + 1]
+        else:
+            print("Error: --input-csv requires a file path.")
+            sys.exit(1)
+
+    # Clean flags (and --input-csv's value) from the list to ease manual parsing
+    args_clean = []
+    skip_next = False
+    for a in args:
+        if skip_next:
+            skip_next = False
+            continue
+        if a == "--no-interactive":
+            continue
+        if a == "--input-csv":
+            skip_next = True
+            continue
+        args_clean.append(a)
+
     # 1. Run security check first
     run_security_check()
     
@@ -290,7 +328,7 @@ def main():
         if ticker.startswith("-"):
             print(f"Error: Unknown argument '{ticker}'.")
             sys.exit(1)
-        run_single_stock(ticker, no_interactive, output_dir)
+        run_single_stock(ticker, no_interactive, output_dir, input_csv)
 
 if __name__ == "__main__":
     main()

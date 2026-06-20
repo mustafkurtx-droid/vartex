@@ -1,0 +1,15 @@
+{
+  "_description": "Golden risk metrics for fixture_stock_data.csv. Computed by tests/generate_fixture.py (independent numpy reference).",
+  "_provenance": {
+    "n_days": 80,
+    "designed_max_drawdown": -0.2,
+    "peak_price": 150.0,
+    "trough_price": 120.0
+  },
+  "tolerance_abs": 1e-06,
+  "ann_volatility": 0.19629039357379813,
+  "var_95": 0.017511420655694464,
+  "var_99": 0.020250951629139227,
+  "sharpe_ratio": 5.313053915201105,
+  "max_drawdown": -0.2
+}
