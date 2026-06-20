@@ -3,3 +3,11 @@ __pycache__/
 .pytest_cache/
 *.pyc
 .env
+
+# Generated run artifacts (keep working tree clean across test runs).
+# outputs/* is ignored EXCEPT the two demo charts referenced by README.md.
+outputs/*
+!outputs/portfolio_THYAO_IS_AAPL_GARAN_IS_monte_carlo.png
+!outputs/portfolio_THYAO_IS_AAPL_GARAN_IS_mc_returns_histogram.png
+test_outputs/
+/security_report.md

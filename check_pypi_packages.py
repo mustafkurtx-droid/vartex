@@ -174,8 +174,11 @@ This report verifies the presence, last update dates, and security status of the
     if not details_found:
         report_content += "\nNo suspicious activity or vulnerability has been detected.\n"
 
-    # Write to security_report.md
-    report_file = "security_report.md"
+    # Write the security report into the output directory (isolation consistency
+    # with the other reports/charts), not the repo root.
+    output_dir = os.environ.get("VARTEX_OUTPUT_DIR", "outputs")
+    os.makedirs(output_dir, exist_ok=True)
+    report_file = os.path.join(output_dir, "security_report.md")
     try:
         with open(report_file, "w", encoding="utf-8") as f:
             f.write(report_content)

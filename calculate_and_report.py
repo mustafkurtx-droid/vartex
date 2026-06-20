@@ -4,6 +4,66 @@ import numpy as np
 import pandas as pd
 from data_fetcher import fetch_stock_data
 
+
+def compute_risk_metrics(df):
+    """
+    Pure, deterministic risk-metric computation. No I/O, no network, no prompts.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Must contain a 'Close' column in chronological order.
+
+    Returns
+    -------
+    dict with keys:
+        ann_volatility, var_95, var_99, sharpe_ratio, max_drawdown,
+        ann_return, daily_std
+
+    Raises
+    ------
+    ValueError
+        If a return series cannot be built (insufficient data).
+    """
+    df = df.copy()
+
+    # Daily logarithmic return: ln(P_t / P_{t-1})
+    df['Log_Return'] = np.log(df['Close'] / df['Close'].shift(1))
+    log_returns = df['Log_Return'].dropna()
+
+    if log_returns.empty:
+        raise ValueError("Could not generate return series (insufficient data).")
+
+    # Annualized volatility: daily standard deviation * sqrt(252)
+    daily_std = log_returns.std()
+    ann_volatility = daily_std * np.sqrt(252)
+
+    # Historical VaR at 95% and 99% confidence levels
+    var_95 = -np.percentile(log_returns, 5)
+    var_99 = -np.percentile(log_returns, 1)
+
+    # Sharpe Ratio (risk-free rate 0%)
+    mean_daily_return = log_returns.mean()
+    ann_return = mean_daily_return * 252
+    sharpe_ratio = ann_return / ann_volatility if ann_volatility != 0 else 0.0
+
+    # Maximum Drawdown
+    prices = df['Close']
+    roll_max = prices.cummax()
+    drawdown = (prices - roll_max) / roll_max
+    max_drawdown = drawdown.min()
+
+    return {
+        "ann_volatility": ann_volatility,
+        "var_95": var_95,
+        "var_99": var_99,
+        "sharpe_ratio": sharpe_ratio,
+        "max_drawdown": max_drawdown,
+        "ann_return": ann_return,
+        "daily_std": daily_std,
+    }
+
+
 def main():
     try:
         ticker = "THYAO.IS"
@@ -64,34 +124,18 @@ def main():
             print(f"Error: No data available to analyze for {ticker}.")
             sys.exit(1)
 
-        # 2. Risk calculations
+        # 2. Risk calculations (delegated to the pure, testable helper)
         try:
-            # Daily logarithmic return calculation: ln(P_t / P_{t-1})
-            df['Log_Return'] = np.log(df['Close'] / df['Close'].shift(1))
-            log_returns = df['Log_Return'].dropna()
-            
-            if log_returns.empty:
-                print(f"Error: Could not generate return series for {ticker} (insufficient data).")
-                sys.exit(1)
-            
-            # Annualized volatility calculation: daily standard deviation * sqrt(252)
-            daily_std = log_returns.std()
-            ann_volatility = daily_std * np.sqrt(252)
-            
-            # Historical VaR (at 95% and 99% confidence levels) calculation
-            var_95 = -np.percentile(log_returns, 5)
-            var_99 = -np.percentile(log_returns, 1)
-            
-            # Sharpe Ratio calculation (risk-free rate 0%)
-            mean_daily_return = log_returns.mean()
-            ann_return = mean_daily_return * 252
-            sharpe_ratio = ann_return / ann_volatility if ann_volatility != 0 else 0.0
-            
-            # Maximum Drawdown calculation
-            prices = df['Close']
-            roll_max = prices.cummax()
-            drawdown = (prices - roll_max) / roll_max
-            max_drawdown = drawdown.min()
+            metrics = compute_risk_metrics(df)
+            ann_volatility = metrics["ann_volatility"]
+            var_95 = metrics["var_95"]
+            var_99 = metrics["var_99"]
+            sharpe_ratio = metrics["sharpe_ratio"]
+            max_drawdown = metrics["max_drawdown"]
+        except ValueError as e:
+            # Insufficient data to build a return series.
+            print(f"Error: {str(e)} ({ticker})")
+            sys.exit(1)
         except Exception as e:
             print(f"Error: An error occurred while calculating mathematical risk metrics: {str(e)}")
             sys.exit(1)
