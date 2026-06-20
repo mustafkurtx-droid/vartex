@@ -37,6 +37,13 @@ def _offline_main_env():
     env["VARTEX_SKIP_SECURITY"] = "1"
     return env
 
+
+def _no_net_env():
+    """Env for non-interactive runs that should not hit the PyPI security check."""
+    env = os.environ.copy()
+    env["VARTEX_SKIP_SECURITY"] = "1"
+    return env
+
 def clean_outputs():
     if os.path.exists(OUTPUT_DIR):
         shutil.rmtree(OUTPUT_DIR)
@@ -49,12 +56,15 @@ def setup_teardown():
     # No need to clean after, so developers can inspect output
 
 def test_normal_risk_analysis():
-    # Scenario: Normal risk analysis with a valid ticker completes successfully
-    cmd = [sys.executable, "main.py", "THYAO.IS", "--no-interactive"]
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    
-    assert result.returncode == 0
-    # Check that CSV is fetched and saved
+    # Scenario: Normal risk analysis with a valid ticker completes successfully.
+    # OFFLINE: feeds a fixed fixture CSV via --input-csv and skips the PyPI check,
+    # so the full happy-path pipeline runs without any network access.
+    cmd = [sys.executable, "main.py", "THYAO.IS", "--no-interactive",
+           "--input-csv", FIXTURE_CSV]
+    result = subprocess.run(cmd, capture_output=True, text=True, env=_no_net_env())
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    # Check that the data CSV is in place
     csv_file = os.path.join(OUTPUT_DIR, "THYAO_IS_data.csv")
     assert os.path.exists(csv_file)
     
@@ -80,10 +90,13 @@ def test_normal_risk_analysis():
     assert "Historical VaR vs. Monte Carlo VaR Comparison" in content
 
 def test_invalid_ticker():
-    # Scenario: Analysis fails and stops when an invalid or non-existent ticker is provided
+    # Scenario: Analysis fails and stops when an invalid or non-existent ticker is provided.
+    # This test deliberately exercises the REAL data-fetch failure path (yfinance returns
+    # empty for a bad symbol) -- that is the behaviour under test, so it cannot use a fixture
+    # CSV. We only skip the unrelated PyPI security scan so it stays fast.
     cmd = [sys.executable, "main.py", "XXXYZZ", "--no-interactive"]
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    
+    result = subprocess.run(cmd, capture_output=True, text=True, env=_no_net_env())
+
     # Return code of 1 should be returned
     assert result.returncode == 1
     # Check that error is in stdout/stderr and it stops immediately
@@ -143,21 +156,25 @@ def test_risk_threshold_human_in_the_loop_approve():
     assert "Sharpe" in content and "Drawdown" in content
 
 def test_security_check_suspicious_package():
-    # Scenario: Fake or hallucinated package detection halts orchestration
-    # Backup requirements.txt
+    # Scenario: Fake or hallucinated package detection halts orchestration.
+    # This test verifies the REAL PyPI slopsquatting check, so it cannot skip security.
+    # To keep it fast we temporarily shrink requirements.txt to one known-good package
+    # plus the fake one (2 PyPI requests instead of ~35), and feed --input-csv so no
+    # yfinance call can happen even if the abort logic regressed.
     backup_path = REQUIREMENTS_PATH + ".bak"
     shutil.copy2(REQUIREMENTS_PATH, backup_path)
-    
+
     try:
-        # Add fake package to requirements.txt
-        with open(REQUIREMENTS_PATH, "a", encoding="utf-8") as f:
-            f.write("\nthis-package-does-not-exist-on-pypi-12345==9.9.9\n")
-            
-        cmd = [sys.executable, "main.py", "THYAO.IS", "--no-interactive"]
+        # Minimal requirements: one real package + one guaranteed-missing package.
+        with open(REQUIREMENTS_PATH, "w", encoding="utf-8") as f:
+            f.write("pip\nthis-package-does-not-exist-on-pypi-12345==9.9.9\n")
+
+        cmd = [sys.executable, "main.py", "THYAO.IS", "--no-interactive",
+               "--input-csv", FIXTURE_CSV]
         result = subprocess.run(cmd, capture_output=True, text=True)
-        
+
         # Abort process
-        assert result.returncode == 1
+        assert result.returncode == 1, result.stdout + result.stderr
         # English security report should be generated on disk
         sec_report = os.path.join(WORKSPACE, "security_report.md")
         assert os.path.exists(sec_report)
@@ -173,22 +190,24 @@ def test_security_check_suspicious_package():
             os.remove(backup_path)
 
 def test_same_ticker_re_analysis_versioning():
-    # Scenario: Re-analyzing same ticker preserves old report and creates versioned copy
-    cmd = [sys.executable, "main.py", "THYAO.IS", "--no-interactive"]
-    
+    # Scenario: Re-analyzing same ticker preserves old report and creates versioned copy.
+    # OFFLINE: fixture CSV via --input-csv + skipped PyPI check, run twice.
+    cmd = [sys.executable, "main.py", "THYAO.IS", "--no-interactive",
+           "--input-csv", FIXTURE_CSV]
+
     # Run first time
-    res1 = subprocess.run(cmd, capture_output=True, text=True)
-    assert res1.returncode == 0
+    res1 = subprocess.run(cmd, capture_output=True, text=True, env=_no_net_env())
+    assert res1.returncode == 0, res1.stdout + res1.stderr
     report_file = os.path.join(OUTPUT_DIR, "risk_report_THYAO_IS.md")
     assert os.path.exists(report_file)
-    
+
     # Modify the first report slightly to check it's not overwritten
     with open(report_file, "a", encoding="utf-8") as f:
         f.write("\nUNIQUE_MARKER_FOR_TEST\n")
-        
+
     # Run second time
-    res2 = subprocess.run(cmd, capture_output=True, text=True)
-    assert res2.returncode == 0
+    res2 = subprocess.run(cmd, capture_output=True, text=True, env=_no_net_env())
+    assert res2.returncode == 0, res2.stdout + res2.stderr
     
     # First report should still have marker
     with open(report_file, "r", encoding="utf-8") as f:
