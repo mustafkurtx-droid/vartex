@@ -176,7 +176,7 @@ def test_security_check_suspicious_package():
         # Abort process
         assert result.returncode == 1, result.stdout + result.stderr
         # English security report should be generated on disk
-        sec_report = os.path.join(WORKSPACE, "security_report.md")
+        sec_report = os.path.join(OUTPUT_DIR, "security_report.md")
         assert os.path.exists(sec_report)
         
         with open(sec_report, "r", encoding="utf-8") as f:
