@@ -6,8 +6,18 @@ This guide shows you step-by-step how to run and verify the Vartex system via te
 
 ## 1. Setup and Virtual Environment Activation
 
-Before running any commands, open your terminal in the project directory (`D:\vartex`) and activate the virtual Python environment:
+To make VarTex fully portable (e.g., when moving the project drive to another computer where the Python path or drive letter might change), we provide an automatic launcher script `run.bat` at the root of the project.
 
+### Recommended (Portable / Auto-Heal):
+Open your terminal in the project directory and run:
+* **Using `run.bat`:**
+  ```cmd
+  run.bat [arguments]
+  ```
+  *This script will automatically detect your system Python, verify if the virtual environment is working, recreate it/reinstall dependencies if it is broken or was configured for another machine, and execute VarTex.*
+
+### Manual Activation:
+Alternatively, you can manually activate the virtual environment:
 * **Windows PowerShell:**
   ```powershell
   .\venv\Scripts\Activate.ps1
