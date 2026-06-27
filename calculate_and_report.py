@@ -103,10 +103,10 @@ def main():
             
         clean_ticker = ticker.replace(".", "_")
         output_dir = os.environ.get("VARTEX_OUTPUT_DIR", "outputs")
-        csv_file = os.path.join(output_dir, f"{clean_ticker}_data.csv")
+        csv_file = os.path.join(output_dir, "csv", f"{clean_ticker}_data.csv")
         
         if not report_path:
-            report_path = os.path.join(output_dir, f"risk_report_{clean_ticker}.md")
+            report_path = os.path.join(output_dir, "md", f"risk_report_{clean_ticker}.md")
         
         # 1. Load data and clean NaNs
         try:
@@ -213,6 +213,7 @@ This report includes the risk metrics calculated using purely deterministic Pyth
 *Note: This report is calculated entirely using deterministic Python code. It does not contain AI predictions or probabilistic inferences.*
 """
 
+            os.makedirs(os.path.dirname(report_path), exist_ok=True)
             with open(report_path, "w", encoding="utf-8") as f:
                 f.write(report_content)
             print(f"\nEnglish risk report successfully saved to '{report_path}'.")

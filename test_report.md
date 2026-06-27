@@ -3,7 +3,7 @@
 This report contains the results of the pytest integration tests run on the actual codebase representing the Gherkin behavioral scenarios (`risk_agent.feature`).
 
 ## Test Summary
-- **Report Date:** 2026-06-20 15:31:28
+- **Report Date:** 2026-06-20 18:36:37
 - **Total Tested Scenarios:** 14
 - **Passed Tests:** 14
 - **Failed Tests:** 0
@@ -34,9 +34,11 @@ This report contains the results of the pytest integration tests run on the actu
 ## pytest Console Output Detail
 ```text
 ============================= test session starts =============================
-platform win32 -- Python 3.12.10, pytest-9.1.1, pluggy-1.6.0 -- D:\vartex\venv\Scripts\python.exe
+platform win32 -- Python 3.12.10, pytest-8.3.3, pluggy-1.6.0 -- C:\Users\musta\AppData\Local\Programs\Python\Python312\python.exe
 cachedir: .pytest_cache
 rootdir: D:\vartex
+plugins: anyio-4.13.0, asyncio-0.24.0, mock-3.14.0
+asyncio: mode=Mode.STRICT, default_loop_scope=None
 collecting ... collected 14 items
 
 test_specs.py::test_normal_risk_analysis PASSED                          [  7%]
@@ -55,11 +57,15 @@ test_specs.py::test_approval_3_monte_carlo_cancel PASSED                 [ 92%]
 test_specs.py::test_approval_4_comparison_cancel PASSED                  [100%]
 
 ============================== warnings summary ===============================
-venv\Lib\site-packages\_pytest\cacheprovider.py:469
-  D:\vartex\venv\Lib\site-packages\_pytest\cacheprovider.py:469: PytestCacheWarning: could not create cache path D:\vartex\.pytest_cache\v\cache\nodeids: [WinError 5] Eriim engellendi: 'D:\\vartex\\.pytest_cache\\v\\cache'
+C:\Users\musta\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest\cacheprovider.py:475
+  C:\Users\musta\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest\cacheprovider.py:475: PytestCacheWarning: could not create cache path D:\vartex\.pytest_cache\v\cache\nodeids: [WinError 5] Eriim engellendi: 'D:\\vartex\\.pytest_cache\\v\\cache'
     config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
 
+C:\Users\musta\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest\stepwise.py:51
+  C:\Users\musta\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest\stepwise.py:51: PytestCacheWarning: could not create cache path D:\vartex\.pytest_cache\v\cache\stepwise: [WinError 5] Eriim engellendi: 'D:\\vartex\\.pytest_cache\\v\\cache'
+    session.config.cache.set(STEPWISE_CACHE_DIR, [])
+
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-======================= 14 passed, 1 warning in 25.98s ========================
+======================= 14 passed, 2 warnings in 25.28s =======================
 
 ```

@@ -15,7 +15,7 @@ def run_monte_carlo_simulation(ticker: str, num_simulations: int = 10000, horizo
     try:
         clean_ticker = ticker.replace(".", "_")
         output_dir = os.environ.get("VARTEX_OUTPUT_DIR", "outputs")
-        csv_file = os.path.join(output_dir, f"{clean_ticker}_data.csv")
+        csv_file = os.path.join(output_dir, "csv", f"{clean_ticker}_data.csv")
         
         # 1. Data Loading
         try:
@@ -107,7 +107,8 @@ def run_monte_carlo_simulation(ticker: str, num_simulations: int = 10000, horizo
             plt.grid(True, linestyle='--', alpha=0.5)
             plt.legend()
             
-            chart_path = os.path.join(output_dir, f"{clean_ticker}_monte_carlo.png")
+            chart_path = os.path.join(output_dir, "png", f"{clean_ticker}_monte_carlo.png")
+            os.makedirs(os.path.dirname(chart_path), exist_ok=True)
             plt.savefig(chart_path, dpi=300, bbox_inches='tight')
             plt.close()
             print(f"Simulation chart saved as '{chart_path}'.")

@@ -30,8 +30,9 @@ def fetch_stock_data(ticker: str, period: str = "2y", interval: str = "1d", save
         if save_csv:
             clean_ticker = ticker.replace(".", "_")
             output_dir = os.environ.get("VARTEX_OUTPUT_DIR", "outputs")
-            os.makedirs(output_dir, exist_ok=True)
-            csv_filename = os.path.join(output_dir, f"{clean_ticker}_data.csv")
+            csv_dir = os.path.join(output_dir, "csv")
+            os.makedirs(csv_dir, exist_ok=True)
+            csv_filename = os.path.join(csv_dir, f"{clean_ticker}_data.csv")
             df.to_csv(csv_filename)
             print(f"[{ticker}] Data saved to file '{csv_filename}'.")
             

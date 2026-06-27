@@ -22,7 +22,7 @@ def run_security_check():
 
 def get_versioned_report_path(ticker, output_dir):
     clean_ticker = ticker.replace(".", "_")
-    base_name = os.path.join(output_dir, f"risk_report_{clean_ticker}")
+    base_name = os.path.join(output_dir, "md", f"risk_report_{clean_ticker}")
     
     # Check if base file exists
     report_path = f"{base_name}.md"
@@ -67,9 +67,10 @@ def run_single_stock(ticker, no_interactive, output_dir, input_csv=None):
     # 1. Fetch stock data (or use a provided CSV in test mode, skipping yfinance)
     if input_csv:
         clean_ticker = ticker.replace(".", "_")
-        dest = os.path.join(output_dir, f"{clean_ticker}_data.csv")
+        dest = os.path.join(output_dir, "csv", f"{clean_ticker}_data.csv")
         print(f">>> Test mode: using provided CSV '{input_csv}' (skipping network fetch)...")
         try:
+            os.makedirs(os.path.dirname(dest), exist_ok=True)
             shutil.copy2(input_csv, dest)
         except Exception as e:
             print(f"[-] Error: Could not load provided --input-csv '{input_csv}': {str(e)}")
@@ -226,7 +227,7 @@ def run_portfolio_mode(tickers, amount, no_interactive, output_dir):
     ticker_comb = "_".join(clean_tickers[:3])
     
     # Find next versioned portfolio report path
-    base_portfolio_report = os.path.join(output_dir, f"portfolio_report_{ticker_comb}")
+    base_portfolio_report = os.path.join(output_dir, "md", f"portfolio_report_{ticker_comb}")
     portfolio_report_path = f"{base_portfolio_report}.md"
     if os.path.exists(portfolio_report_path):
         version = 1

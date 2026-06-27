@@ -23,13 +23,13 @@ def main():
     clean_tickers = [t.replace(".", "_") for t in tickers]
     if not report_file:
         ticker_comb = "_".join(clean_tickers[:3])
-        report_file = os.path.join(output_dir, f"portfolio_report_{ticker_comb}.md")
+        report_file = os.path.join(output_dir, "md", f"portfolio_report_{ticker_comb}.md")
     
     # 1. Load and merge data
     dfs = []
     for t in tickers:
         clean_t = t.replace(".", "_")
-        csv_file = os.path.join(output_dir, f"{clean_t}_data.csv")
+        csv_file = os.path.join(output_dir, "csv", f"{clean_t}_data.csv")
         if not os.path.exists(csv_file):
             print(f"Error: {csv_file} not found.")
             sys.exit(1)
@@ -132,7 +132,8 @@ def main():
     
     # 6. Save Charts
     ticker_comb = "_".join(clean_tickers[:3])
-    chart_name = os.path.join(output_dir, f"portfolio_{ticker_comb}_monte_carlo.png")
+    chart_name = os.path.join(output_dir, "png", f"portfolio_{ticker_comb}_monte_carlo.png")
+    os.makedirs(os.path.dirname(chart_name), exist_ok=True)
     plt.figure(figsize=(10, 6))
     plt.plot(paths_port[:, :100], lw=1, alpha=0.6)
     plt.title(f"Portfolio Monte Carlo Price Projection (Equally Weighted {N} Assets)")
@@ -144,7 +145,8 @@ def main():
     plt.savefig(chart_name, dpi=300, bbox_inches='tight')
     plt.close()
     
-    hist_name = os.path.join(output_dir, f"portfolio_{ticker_comb}_mc_returns_histogram.png")
+    hist_name = os.path.join(output_dir, "png", f"portfolio_{ticker_comb}_mc_returns_histogram.png")
+    os.makedirs(os.path.dirname(hist_name), exist_ok=True)
     plt.figure(figsize=(10, 6))
     plt.hist((amount - paths_port[-1]) / amount * 100, bins=50, alpha=0.75, color='royalblue', edgecolor='black')
     plt.axvline((mc_var_95_port / amount) * 100, color='orange', linestyle='--', lw=2, label=f'95% MC VaR: {(mc_var_95_port / amount) * 100:.2f}%')
@@ -217,10 +219,10 @@ The correlation matrix indicating the relationships between two or more stocks i
 ## Portfolio Monte Carlo Simulation Charts
 
 ### Portfolio Price Projection (1-Month Horizon)
-![Portfolio Monte Carlo Simulation]({os.path.basename(chart_name)})
+![Portfolio Monte Carlo Simulation](../png/{os.path.basename(chart_name)})
 
 ### Portfolio Value Loss Distribution and Monte Carlo VaR Thresholds
-![Portfolio Loss Distribution Chart]({os.path.basename(hist_name)})
+![Portfolio Loss Distribution Chart](../png/{os.path.basename(hist_name)})
 
 ---
 
@@ -233,6 +235,7 @@ The correlation matrix indicating the relationships between two or more stocks i
 *Note: This report has been produced entirely using real historical data and probabilistic Monte Carlo simulations with Python. It does not constitute investment advice.*
 """
     
+    os.makedirs(os.path.dirname(report_file), exist_ok=True)
     with open(report_file, "w", encoding="utf-8") as f:
         f.write(report_content)
         

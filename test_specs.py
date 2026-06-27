@@ -24,8 +24,9 @@ SYNTH_HIGH_RISK_CSV = os.path.join(FIXTURE_DIR, "synthetic_high_risk_stock.csv")
 def _seed_csv(ticker, src):
     """Place a fixture CSV where the sub-scripts expect it (so they skip yfinance)."""
     clean = ticker.replace(".", "_")
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-    dest = os.path.join(OUTPUT_DIR, f"{clean}_data.csv")
+    csv_dir = os.path.join(OUTPUT_DIR, "csv")
+    os.makedirs(csv_dir, exist_ok=True)
+    dest = os.path.join(csv_dir, f"{clean}_data.csv")
     shutil.copy2(src, dest)
     return dest
 
@@ -65,11 +66,11 @@ def test_normal_risk_analysis():
 
     assert result.returncode == 0, result.stdout + result.stderr
     # Check that the data CSV is in place
-    csv_file = os.path.join(OUTPUT_DIR, "THYAO_IS_data.csv")
+    csv_file = os.path.join(OUTPUT_DIR, "csv", "THYAO_IS_data.csv")
     assert os.path.exists(csv_file)
     
     # Check report is generated
-    report_file = os.path.join(OUTPUT_DIR, "risk_report_THYAO_IS.md")
+    report_file = os.path.join(OUTPUT_DIR, "md", "risk_report_THYAO_IS.md")
     assert os.path.exists(report_file)
     
     with open(report_file, "r", encoding="utf-8") as f:
@@ -81,11 +82,11 @@ def test_normal_risk_analysis():
     assert "Drawdown" in content or "drawdown" in content or "Maksimum" in content
     
     # Monte Carlo charts created
-    chart_file = os.path.join(OUTPUT_DIR, "THYAO_IS_monte_carlo.png")
+    chart_file = os.path.join(OUTPUT_DIR, "png", "THYAO_IS_monte_carlo.png")
     assert os.path.exists(chart_file)
     
     # Comparative VaR steps completed (distribution chart and comparison table)
-    hist_file = os.path.join(OUTPUT_DIR, "THYAO_IS_mc_returns_histogram.png")
+    hist_file = os.path.join(OUTPUT_DIR, "png", "THYAO_IS_mc_returns_histogram.png")
     assert os.path.exists(hist_file)
     assert "Historical VaR vs. Monte Carlo VaR Comparison" in content
 
@@ -102,7 +103,7 @@ def test_invalid_ticker():
     # Check that error is in stdout/stderr and it stops immediately
     assert "Error" in result.stdout or "Error" in result.stderr or "failed" in result.stdout or "failed" in result.stderr
     # Verification that reports/charts are not created
-    report_file = os.path.join(OUTPUT_DIR, "risk_report_XXXYZZ.md")
+    report_file = os.path.join(OUTPUT_DIR, "md", "risk_report_XXXYZZ.md")
     assert not os.path.exists(report_file)
 
 def test_risk_threshold_human_in_the_loop_cancel():
@@ -111,7 +112,7 @@ def test_risk_threshold_human_in_the_loop_cancel():
     # Exercises calculate_and_report.py directly (that is where the gate lives).
     ticker = "SYNTHRISK"
     _seed_csv(ticker, SYNTH_HIGH_RISK_CSV)
-    report_file = os.path.join(OUTPUT_DIR, f"risk_report_{ticker}.md")
+    report_file = os.path.join(OUTPUT_DIR, "md", f"risk_report_{ticker}.md")
 
     env = os.environ.copy()
     env["FORCE_INTERACTIVE"] = "1"
@@ -135,7 +136,7 @@ def test_risk_threshold_human_in_the_loop_approve():
     # OFFLINE: synthetic -40% drawdown CSV; calculate_and_report.py invoked directly.
     ticker = "SYNTHRISK"
     _seed_csv(ticker, SYNTH_HIGH_RISK_CSV)
-    report_file = os.path.join(OUTPUT_DIR, f"risk_report_{ticker}.md")
+    report_file = os.path.join(OUTPUT_DIR, "md", f"risk_report_{ticker}.md")
 
     env = os.environ.copy()
     env["FORCE_INTERACTIVE"] = "1"
@@ -176,7 +177,7 @@ def test_security_check_suspicious_package():
         # Abort process
         assert result.returncode == 1, result.stdout + result.stderr
         # English security report should be generated on disk
-        sec_report = os.path.join(OUTPUT_DIR, "security_report.md")
+        sec_report = os.path.join(OUTPUT_DIR, "md", "security_report.md")
         assert os.path.exists(sec_report)
         
         with open(sec_report, "r", encoding="utf-8") as f:
@@ -198,7 +199,7 @@ def test_same_ticker_re_analysis_versioning():
     # Run first time
     res1 = subprocess.run(cmd, capture_output=True, text=True, env=_no_net_env())
     assert res1.returncode == 0, res1.stdout + res1.stderr
-    report_file = os.path.join(OUTPUT_DIR, "risk_report_THYAO_IS.md")
+    report_file = os.path.join(OUTPUT_DIR, "md", "risk_report_THYAO_IS.md")
     assert os.path.exists(report_file)
 
     # Modify the first report slightly to check it's not overwritten
@@ -215,7 +216,7 @@ def test_same_ticker_re_analysis_versioning():
     assert "UNIQUE_MARKER_FOR_TEST" in content1
     
     # Second report should exist as version 1
-    report_file_1 = os.path.join(OUTPUT_DIR, "risk_report_THYAO_IS_1.md")
+    report_file_1 = os.path.join(OUTPUT_DIR, "md", "risk_report_THYAO_IS_1.md")
     assert os.path.exists(report_file_1)
 
 
@@ -290,7 +291,7 @@ def test_max_drawdown_calculation_accuracy():
 def test_approval_1_deterministic_cancel():
     # Onay 1 ("Proceed to deterministic risk analysis?") -> "n" -> exit 0, no report.
     ticker = "FIXNORM"
-    report_file = os.path.join(OUTPUT_DIR, f"risk_report_{ticker}.md")
+    report_file = os.path.join(OUTPUT_DIR, "md", f"risk_report_{ticker}.md")
     result = subprocess.run(
         [sys.executable, "main.py", ticker, "--input-csv", FIXTURE_CSV],
         input="n\n",
@@ -306,8 +307,8 @@ def test_approval_3_monte_carlo_cancel():
     # Onay 1 -> "y", Onay 3 ("Proceed to Monte Carlo?") -> "n".
     # Deterministic report exists, but no Monte Carlo chart is produced.
     ticker = "FIXNORM"
-    report_file = os.path.join(OUTPUT_DIR, f"risk_report_{ticker}.md")
-    mc_chart = os.path.join(OUTPUT_DIR, f"{ticker}_monte_carlo.png")
+    report_file = os.path.join(OUTPUT_DIR, "md", f"risk_report_{ticker}.md")
+    mc_chart = os.path.join(OUTPUT_DIR, "png", f"{ticker}_monte_carlo.png")
     result = subprocess.run(
         [sys.executable, "main.py", ticker, "--input-csv", FIXTURE_CSV],
         input="y\nn\n",
@@ -324,9 +325,9 @@ def test_approval_4_comparison_cancel():
     # Onay 1 -> "y", Onay 3 -> "y", Onay 4 ("Proceed to comparative VaR?") -> "n".
     # Monte Carlo chart exists, but no comparison histogram / comparison section.
     ticker = "FIXNORM"
-    report_file = os.path.join(OUTPUT_DIR, f"risk_report_{ticker}.md")
-    mc_chart = os.path.join(OUTPUT_DIR, f"{ticker}_monte_carlo.png")
-    hist_chart = os.path.join(OUTPUT_DIR, f"{ticker}_mc_returns_histogram.png")
+    report_file = os.path.join(OUTPUT_DIR, "md", f"risk_report_{ticker}.md")
+    mc_chart = os.path.join(OUTPUT_DIR, "png", f"{ticker}_monte_carlo.png")
+    hist_chart = os.path.join(OUTPUT_DIR, "png", f"{ticker}_mc_returns_histogram.png")
     result = subprocess.run(
         [sys.executable, "main.py", ticker, "--input-csv", FIXTURE_CSV],
         input="y\ny\nn\n",

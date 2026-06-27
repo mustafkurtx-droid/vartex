@@ -45,10 +45,10 @@ def main():
             
         clean_ticker = ticker.replace(".", "_")
         output_dir = os.environ.get("VARTEX_OUTPUT_DIR", "outputs")
-        csv_file = os.path.join(output_dir, f"{clean_ticker}_data.csv")
+        csv_file = os.path.join(output_dir, "csv", f"{clean_ticker}_data.csv")
         
         if not report_file:
-            report_file = os.path.join(output_dir, f"risk_report_{clean_ticker}.md")
+            report_file = os.path.join(output_dir, "md", f"risk_report_{clean_ticker}.md")
         
         # 1. Load data
         try:
@@ -113,7 +113,8 @@ def main():
             plt.grid(True, linestyle='--', alpha=0.5)
             plt.legend()
             
-            histogram_path = os.path.join(output_dir, f"{clean_ticker}_mc_returns_histogram.png")
+            histogram_path = os.path.join(output_dir, "png", f"{clean_ticker}_mc_returns_histogram.png")
+            os.makedirs(os.path.dirname(histogram_path), exist_ok=True)
             plt.savefig(histogram_path, dpi=150, bbox_inches='tight')
             plt.close()
             print(f"Simulation distribution chart saved as '{histogram_path}'.")
@@ -147,7 +148,7 @@ The following table and chart compare the **Historical VaR** method using past d
 ### Monte Carlo 1-Day Simulated Return Distribution ({ticker})
 The distribution of returns obtained from the simulation and the Monte Carlo VaR values are shown in the chart below:
 
-![Monte Carlo 1-Day Distribution Chart]({clean_ticker}_mc_returns_histogram.png)
+![Monte Carlo 1-Day Distribution Chart](../png/{clean_ticker}_mc_returns_histogram.png)
 
 ### Comparison Analysis Commentary
 1. **Model Assumption:** While Monte Carlo VaR runs under the assumption that returns are normally distributed, Historical VaR directly incorporates skewness and heavy-tailed (kurtosis) properties present in historical data.
@@ -155,6 +156,7 @@ The distribution of returns obtained from the simulation and the Monte Carlo VaR
 """
             
             updated_content = existing_content + addition
+            os.makedirs(os.path.dirname(report_file), exist_ok=True)
             with open(report_file, "w", encoding="utf-8") as f:
                 f.write(updated_content)
             print(f"Results successfully appended and updated in '{report_file}'.")
